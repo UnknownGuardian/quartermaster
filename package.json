@@ -1,0 +1,43 @@
+{
+  "name": "quartermaster",
+  "version": "0.8.0",
+  "description": "Model and Simulate techniques for Graceful Degradation",
+  "keywords": [
+    "quartermaster",
+    "graceful",
+    "degradation",
+    "fault",
+    "tolerance",
+    "simulation",
+    "circuit-breaker",
+    "retry",
+    "timeout",
+    "stage"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "example:novel": "ts-node examples/novel.ts",
+    "example:manual": "ts-node examples/manual.ts",
+    "example:timed": "ts-node examples/timed.ts",
+    "example:queue-sorting": "ts-node examples/queue-sorting.ts",
+    "example:variable-traffic": "ts-node examples/variable-traffic.ts",
+    "example:aggressive-timeouts": "ts-node examples/aggressive-timeouts.ts",
+    "example:custom-statistics": "ts-node examples/custom-statistics.ts",
+    "test": "jest"
+  },
+  "author": "Matt Pope",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^26.0.3",
+    "@types/node": "^14.0.11",
+    "colors": "^1.4.0",
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  }
+}
