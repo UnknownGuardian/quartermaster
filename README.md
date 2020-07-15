@@ -28,10 +28,6 @@ To explore and develop locally, you can clone this repository. This provides the
 
 `git clone git@github.com:UnknownGuardian/quartermaster.git`
 
-Alternatively, to use this in an existing project, it is available on NPM:
-
-`npm i ....`
-
 ### Usage
 
 A sample usage, representing a call to a remote dependency with a cache:
@@ -43,7 +39,7 @@ import {
   simulation,
   eventSummary,
   stageSummary,
-} from "...";
+} from ".";
 
 /**
  * The timed example is the basic unit of several other examples. It features
@@ -185,7 +181,7 @@ Confusing:
   - [ ] Simulator
   - [ ] Metronome
 - [ ] Add custom column method to summary. i.e. just list of functions to include as additional columns in the table.
-- [ ] Go to website, grab document type for latex 4 page doc, read couple papers, couple videos. Send this paper to Dr. Sillito when mature.
-- [ ] Tech Transfer
+- [x] Go to website, grab document type for latex 4 page doc, read couple papers, couple videos. Send this paper to Dr. Sillito when mature.
+- [x] Tech Transfer
 - [ ] tool for calculating gamma distribution from 50, 90, 95th percentiles
 - [ ] publish NPM, update documentation

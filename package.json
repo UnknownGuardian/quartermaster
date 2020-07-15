@@ -17,7 +17,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
     "build": "tsc",
     "example:novel": "ts-node examples/novel.ts",
     "example:manual": "ts-node examples/manual.ts",
@@ -26,6 +25,7 @@
     "example:variable-traffic": "ts-node examples/variable-traffic.ts",
     "example:aggressive-timeouts": "ts-node examples/aggressive-timeouts.ts",
     "example:custom-statistics": "ts-node examples/custom-statistics.ts",
+    "start": "ts-node src/index.ts",
     "test": "jest"
   },
   "author": "Matt Pope",
