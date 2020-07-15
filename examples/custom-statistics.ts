@@ -19,16 +19,23 @@ simulation.keyspaceMean = 999;
 simulation.keyspaceStd = 90;
 simulation.eventsPer1000Ticks = 40;
 
+/**
+ * A custom stat, implemented with metronome.
+ * Polls a summary of the cache every 30 seconds.
+ */
 
-// A custom stat, implemented with metronome.
-// Gathers a summary of the cache every 30 seconds
 type CacheStats = { keys: number, averageAge: number }
 const cacheSample: CacheStats[] = [];
 metronome.setInterval(sampleCache, 30000);
 
 
-// A custom stat, implemented with a custom stage
-// Gathers information about keys that pass through this stage
+
+
+
+/**
+ * A custom stat, implemented with a custom stage.
+ * Gathers information about keys that pass through this stage.
+ */
 type KeyStats = Record<string, number>;
 class InterceptionStage extends WrappedStage {
   public keyCounts: KeyStats = {};
@@ -43,13 +50,25 @@ const interception = new InterceptionStage(cache);
 work();
 async function work() {
   const events = await simulation.run(interception, 20000);
-  eventSummary(events);
+
+  /**
+   * The default summaries can be augmented by the 2nd optional argument,
+   * which allows you to pass in a custom data to print out in the table
+   */
+  eventSummary(events, [customEventColumn]);
   stageSummary([cache, live])
 
   console.log("")
   console.log("Cache Summary every 30 seconds")
   console.table(cacheSample);
 
+
+
+  /**
+   * Custom stat reporting at the conclusion of the simulation. The 
+   * summaries that come with the framework are for convenience and you can
+   * always write your own.
+   */
   console.log("")
   console.log("Top Keys Sent summary:");
   const top = Object.entries(interception.keyCounts).
@@ -60,6 +79,9 @@ async function work() {
 }
 
 
+/**
+ * The sampler for the custom stat that queries cthe ache for key information.
+ */
 function sampleCache() {
   // filter out stale keys
   const store = cache.getStore();
@@ -74,4 +96,13 @@ function sampleCache() {
 
   const averageAge = usedKeys.reduce<number>((sum, current: any) => sum + (metronome.now() - cache.get(current).time), 0) / keys;
   cacheSample.push({ keys, averageAge })
+}
+
+
+/**
+ * An additional column for the framework's event summary
+ */
+
+function customEventColumn(events: Event[]): number {
+  return 1;
 }

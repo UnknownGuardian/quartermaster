@@ -131,8 +131,8 @@ export const simulation = new Simulation();
  * 4. % slow failures? (interesting?)
  * @param events The events that have completed the simulation
  */
-export function eventSummary(events: Event[]): void {
-  const summary = createEventSummary(events);
+export function eventSummary(events: Event[], additionalColumns?: EventSummaryColumnFunction[]): void {
+  const summary = createEventSummary(events, additionalColumns);
 
   console.log("Overview of Events");
   console.table(summary);
@@ -147,47 +147,46 @@ type ResponseData = {
   mean_latency: string;
   std_latency: string;
 }
-function createEventSummary(events: Event[]): Summary {
-  const failTimes: number[] = [];
-  const successTimes: number[] = [];
+type EventSummaryColumnFunction = (events: Event[]) => number; 1
+function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumnFunction[]): Summary {
+  const success: Event[] = [];
+  const fail: Event[] = [];
 
-  events.forEach(r => {
-    const time = r.responseTime.endTime - r.responseTime.startTime;
-
-    if (r.response == "fail") {
-      failTimes.push(time);
+  events.forEach(e => {
+    if (e.response == "fail") {
+      fail.push(e);
     } else {
-      successTimes.push(time);
+      success.push(e);
     }
   })
 
-  let success = successTimes.length;
-  let fail = failTimes.length;
 
-  const successAvg = successTimes.reduce((sum, cur) => sum + cur, 0) / success;
-  const failAvg = failTimes.reduce((sum, cur) => sum + cur, 0) / fail;
+  const count = (e: Event[]) => e.length;
+  const percent = (e: Event[]) => events.length > 0 ? e.length / events.length : 0;
+  const mean_latency = (e: Event[]) => e.map(e => e.responseTime.endTime - e.responseTime.startTime).reduce((sum, cur) => sum + cur, 0) / e.length;
+  const std_latency = (e: Event[]) => standardDeviation(e.map(e => e.responseTime.endTime - e.responseTime.startTime));
 
-  const successStdDevLatency = standardDeviation(successTimes, successAvg);
-  const failStdDevLatency = standardDeviation(failTimes, failAvg);
+  const others = additionalColumns || [];
+  const names = ["count", "percent", "mean_latency", "std_latency"]
+  const columns = [count, percent, mean_latency, std_latency, ...others];
 
+
+
+  const successRow: any = { type: "success" as Response };
+  const failRow: any = { type: "fail" as Response };
 
   const precision = 3;
-  const table = [
-    {
-      type: "success" as Response,
-      count: success,
-      percent: (success / events.length).toFixed(precision),
-      mean_latency: successAvg.toFixed(precision),
-      std_latency: successStdDevLatency.toFixed(precision)
-    },
-    {
-      type: "fail" as Response,
-      count: fail,
-      percent: (fail / events.length).toFixed(precision),
-      mean_latency: failAvg.toFixed(precision),
-      std_latency: failStdDevLatency.toFixed(precision)
-    }
-  ]
+  columns.map((col, i) => {
+    const propName = names[i] || `Column ${i}`
+
+    const successResult = col(success);
+    successRow[propName] = successResult % 1 == 0 ? successResult : successResult.toFixed(precision);
+
+    const failResult = col(success);
+    failRow[propName] = failResult % 1 == 0 ? failResult : failResult.toFixed(precision);
+  })
+
+  const table = [successRow, failRow];
   return table;
 }
 
