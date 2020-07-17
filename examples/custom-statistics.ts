@@ -100,9 +100,11 @@ function sampleCache() {
 
 
 /**
- * An additional column for the framework's event summary
+ * An additional column for the framework's event summary,
+ * It gets the average work time for the dependency for a set of
+ * events.
  */
 
 function customEventColumn(events: Event[]): number {
-  return 1;
+  return events.map(e => e.stageTimes[0].workTime).reduce((a, c) => a + c, 0) / events.length
 }

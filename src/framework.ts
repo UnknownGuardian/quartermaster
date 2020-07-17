@@ -147,7 +147,7 @@ type ResponseData = {
   mean_latency: string;
   std_latency: string;
 }
-type EventSummaryColumnFunction = (events: Event[]) => number; 1
+type EventSummaryColumnFunction = (events: Event[]) => number;
 function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumnFunction[]): Summary {
   const success: Event[] = [];
   const fail: Event[] = [];
@@ -160,7 +160,6 @@ function createEventSummary(events: Event[], additionalColumns?: EventSummaryCol
     }
   })
 
-
   const count = (e: Event[]) => e.length;
   const percent = (e: Event[]) => events.length > 0 ? e.length / events.length : 0;
   const mean_latency = (e: Event[]) => e.map(e => e.responseTime.endTime - e.responseTime.startTime).reduce((sum, cur) => sum + cur, 0) / e.length;
@@ -170,13 +169,11 @@ function createEventSummary(events: Event[], additionalColumns?: EventSummaryCol
   const names = ["count", "percent", "mean_latency", "std_latency"]
   const columns = [count, percent, mean_latency, std_latency, ...others];
 
-
-
   const successRow: any = { type: "success" as Response };
   const failRow: any = { type: "fail" as Response };
 
   const precision = 3;
-  columns.map((col, i) => {
+  columns.forEach((col, i) => {
     const propName = names[i] || `Column ${i}`
 
     const successResult = col(success);
