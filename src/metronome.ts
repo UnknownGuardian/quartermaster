@@ -3,6 +3,8 @@ type DelayedCall = {
   callback: Function;
 };
 
+import "colors";
+
 class Metronome {
   // don't do work when there is nothing to do
   _sleepResolve: Function | null;
@@ -80,7 +82,8 @@ class Metronome {
 
   stop(clear: Boolean = true) {
     if (clear) this._callbacks.length = 0;
-    clearInterval(this._keepAlive);
+    if (this._keepAlive) clearInterval(this._keepAlive);
+    this._keepAlive = null
   }
 
   wait(ticks: number): Promise<void> {
@@ -89,6 +92,13 @@ class Metronome {
 
   resetCurrentTime(): void {
     this._currentTick = 0;
+  }
+
+  debug(): void {
+    console.log("Metronome Debug".green.bold);
+    console.log("Keep-Alive:", this._keepAlive ? "running".green : "stopped".yellow)
+    console.log("Tasks Scheduled:", this._callbacks.length)
+    console.log("Current Tick:", this.now())
   }
 
 }

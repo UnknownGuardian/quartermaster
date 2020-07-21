@@ -2,33 +2,15 @@
 
 A framework to model and simulate graceful degradation techniques.
 
-## Model
+---
 
-A system that is fault tolerant is resistant to faults, often by allowing the system to degrade gracefully instead of failing immediately. There are certain techniques that are commonly used in industry to this end, such as caching, retries, short timeouts, and the circuit breaker pattern.
-
-In Quartermaster a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous be http requests.
-
-`add()` An admission control function, called before the event enters the queue.
-\
-`workOn()` Called when the event has left the queue and has been picked up by a worker.
-\
-`success()` Called when `workOn()` did not throw an error or returned a rejected promise.
-\
-`fail()` Called when `workOn()` did throw an error or returned a rejected promise.
-
-[Read more about the model of Quartermaster.](docs/model.md)
-
-## Framework
-
-A framework is provided to implement these methods and simulate their behavior. Provided with this code is a set of prebuilt code, is some simulation tools. Since this repository is a typescript implementation of the framework, we've included a brief overview here. You can [read more in-depth about the Quartermaster framework](docs/framework.md) in our docs.
-
-### Installation
+## Installation
 
 To explore and develop locally, you can clone this repository. This provides the examples and Typescript source code in an easy to consume format.
 
 `git clone git@github.com:UnknownGuardian/quartermaster.git`
 
-### Usage
+## Usage
 
 A sample usage, representing a call to a remote dependency with a cache:
 
@@ -82,6 +64,26 @@ async function work() {
   stageSummary([cache, live]);
 }
 ```
+
+## Model
+
+A system that is fault tolerant is resistant to faults, often by allowing the system to degrade gracefully instead of failing immediately. There are certain techniques that are commonly used in industry to this end, such as caching, retries, short timeouts, and the circuit breaker pattern.
+
+In Quartermaster a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous be http requests.
+
+`add()` An admission control function, called before the event enters the queue.
+\
+`workOn()` Called when the event has left the queue and has been picked up by a worker.
+\
+`success()` Called when `workOn()` did not throw an error or returned a rejected promise.
+\
+`fail()` Called when `workOn()` did throw an error or returned a rejected promise.
+
+[Read more about the model of Quartermaster.](docs/model.md)
+
+## Framework
+
+A framework is provided to implement these methods and simulate their behavior. Provided with this code is a set of prebuilt code, is some simulation tools. Since this repository is a typescript implementation of the framework, we've included a brief overview here. You can [read more in-depth about the Quartermaster framework](docs/framework.md) in our docs.
 
 ### Rich Output
 
@@ -152,19 +154,9 @@ Tests can be run with `npm test`.
 
 All prebuilt components have been placed under tests, located in the `./tests` directory.
 
-### Notes:
+## Contributing
 
-Confusing:
-
-- [x] Should we keep event and request separated? XXXXX
-- [x] Combine stats in event and request?
-- [x] Stats:
-  - System wide stats? (snapshots)
-    - Heap snapshot
-    - CPU utilization
-    - Cache hit rate
-    - Latency stats
-- [ ] More detailed usage steps? i.e. create a file
+Open a pull request with your contributions to the framework, or request a feature by opening an issue.
 
 ## TODO:
 
@@ -184,4 +176,9 @@ Confusing:
 - [x] Go to website, grab document type for latex 4 page doc, read couple papers, couple videos. Send this paper to Dr. Sillito when mature.
 - [x] Tech Transfer
 - [ ] tool for calculating gamma distribution from 50, 90, 95th percentiles
-- [ ] publish NPM, update documentation
+- [ ] update documentation
+- [ ] paper
+  - [ ] feedback 7/15
+  - [ ] evaluations section
+  - [ ] references
+  - [ ] mention relation to SEDA

@@ -179,7 +179,7 @@ function createEventSummary(events: Event[], additionalColumns?: EventSummaryCol
     const successResult = col(success);
     successRow[propName] = successResult % 1 == 0 ? successResult : successResult.toFixed(precision);
 
-    const failResult = col(success);
+    const failResult = col(fail);
     failRow[propName] = failResult % 1 == 0 ? failResult : failResult.toFixed(precision);
   })
 

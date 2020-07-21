@@ -29,7 +29,7 @@ export class FIFOQueue implements Queue {
     })
   }
   isFull(): boolean {
-    return this.items.length == this.capacity
+    return this.items.length >= this.capacity
   }
   hasFreeWorker(): boolean {
     return this.workers.some(w => w.event == null);
@@ -39,6 +39,9 @@ export class FIFOQueue implements Queue {
   }
 
   add(item: Item): void {
+    if (this.isFull())
+      throw "fail"
+
     this.items.push(item);
     this.work();
   }

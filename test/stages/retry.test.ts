@@ -38,17 +38,25 @@ describe('Retry', () => {
     dependency.replay = [false, false, false]
     retry.attempts = 2;
 
-    await retry.accept(new Event("first"));
+    await retry.accept(new Event("first")).catch(e => "fail");
 
     expect(replayWorkSpy).toHaveBeenCalledTimes(2);
   })
   test('returns the latest attempt\'s result', async () => {
     dependency.replay = [false, false, true]
-    retry.attempts = 2;
+    retry.attempts = 3;
 
     const res = await retry.accept(new Event("first"));
 
     expect(res).toBe("success")
+  })
+  test('fails if all attempts fail', async () => {
+    dependency.replay = [false, false, false, false]
+    retry.attempts = 2;
+
+    const res = await retry.accept(new Event("first")).catch(e => "fail");
+
+    expect(res).toBe("fail")
   })
 })
 

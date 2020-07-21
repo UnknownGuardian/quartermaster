@@ -24,7 +24,7 @@ export class TimedDependency extends Stage {
       return;
     }
 
-    const latency = normal(this.mean, this.std);
+    const latency = normal(this.errorMean, this.errorStd);
     await metronome.wait(latency);
     return Promise.reject("fail");
   }

@@ -20,5 +20,6 @@ export class Retry extends WrappedStage {
         attempt++;
       }
     }
+    throw "fail"
   }
 }
