@@ -70,97 +70,54 @@ class GithubHookReceiver extends WrappedStage {
 
 
 /**
- * Database with 3 modes:
- * 1. Normal
- * 2. Latent (80-99 concurrent connections)
- * 3. Deadlocked (100 concurrent connections)
+ * Database with exponential serving time 
  */
 type Item = { event: Event, resolve?: Function }
 class DB extends Stage {
   public concurrent: number = 0;
-  public currentlyAccessingKeys: Record<string, Item[]> = {};
-
-  public deadlockMonitorTiming = 5000;
-  public deadlockStats = 0;
-
-  public latentThreshold = 80;
-
-  public mean: number = 20;
-  public errorMean: number = 5;
-  public std: number = 50;
-  public errorStd: number = 10;
-
-
   public availability = 0.9995;
+  public mean: number = 30;
+  public std: number = 5;
+
+  // exponential latency (cc = concurrent connections)
+  // cc   additional latency
+  // 60   2
+  // 80   8
+  // 100  20
+  // 120  65
+  // 150 200
+  public latencyX0 = 0.06;
+  public latencyR = 0.06;
+
+  public deadlockThreshold = 70;
+  public deadlockAvailability = 0.70;
 
   constructor() {
     super();
-    this.inQueue = new FIFOQueue(1, 100);
-
-    metronome.setInterval(() => {
-      this.unlock()
-    }, this.deadlockMonitorTiming)
+    this.inQueue = new FIFOQueue(1, 400);
   }
 
   async workOn(event: Event): Promise<void> {
     this.concurrent++;
-
-    const item: any = { event }
-    if (!this.currentlyAccessingKeys[event.key]) {
-      this.currentlyAccessingKeys[event.key] = [];
-    }
-
-    this.currentlyAccessingKeys[event.key].push(item);
+    stats.max("db.concurrent", this.concurrent)
+    if (this.concurrent >= this.deadlockThreshold)
+      stats.add("db.deadlocked", 1);
 
     try {
-      // handle deadlocks
-      const isLocked = this.currentlyAccessingKeys[event.key].length > 1
-      if (isLocked) {
-        const t = metronome.now();
-        await new Promise((resolve) => item.resolve = resolve).finally(() => {
-          stats.add("db.locked", metronome.now() - t);
-        })
-      }
-
-      // handle extra latency form load
-      const isLatent = this.concurrent >= this.latentThreshold;
-      if (isLatent) {
-        const extraLatency = 10 * this.concurrent;
-        await metronome.wait(extraLatency);
-      }
-
-      // normal latency and availability from fulfilling queries
-      const available = Math.random() < this.availability;
-      if (available) {
-        const latency = normal(this.mean, this.std);
-        await metronome.wait(latency);
-        return;
-      }
-      const latency = normal(this.mean, this.std);
+      const extraMean = this.latencyX0 * ((1 + this.latencyR) ** this.concurrent);
+      const extraStd = extraMean / 500;
+      const latency = normal(this.mean + extraMean, this.std + extraStd);
       await metronome.wait(latency);
-      return Promise.reject("fail");
+
+      const actualAvailability = this.concurrent >= this.deadlockThreshold ? this.deadlockAvailability : this.availability;
+      const availabile = Math.random() < actualAvailability;
+      if (!availabile)
+        throw "fail";
+
     } finally {
       this.concurrent--;
-
-      const index = this.currentlyAccessingKeys[event.key].findIndex(x => x == item);
-      this.currentlyAccessingKeys[event.key].splice(index, 1);
     }
   }
-
-  // unlock deadlocked resource. 
-  // TODO: Reject instead?
-  public unlock() {
-    for (const key in this.currentlyAccessingKeys) {
-      const items = this.currentlyAccessingKeys[key];
-      if (items.length > 0) {
-        if (items[0].resolve) {
-          items[0].resolve();
-          delete items[0].resolve;
-        }
-      }
-    }
-  }
-
 }
 
 
@@ -174,9 +131,11 @@ const rec = new GithubHookReceiver(retry);
 
 simulation.keyspaceMean = 1000;
 simulation.keyspaceStd = 200;
-simulation.eventsPer1000Ticks = 250;
+simulation.eventsPer1000Ticks = 5000;
 
-
+metronome.setInterval(() => {
+  //metronome.debug()
+}, 10000);
 
 work();
 async function work() {
