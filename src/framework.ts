@@ -18,6 +18,9 @@ class Simulation {
   keyspaceStd: number = 50;
 
 
+  private _arrivalRate: number = 0;
+
+
   /**
  * Execute a simulation
  * 
@@ -50,6 +53,7 @@ class Simulation {
 
     while (true) {
       const tickDelta = 1000 / this.eventsPer1000Ticks;
+      this._arrivalRate = this.eventsPer1000Ticks;
 
       if (tickDelta < 1) {
         // fire off multiple events per tick
@@ -62,7 +66,7 @@ class Simulation {
         eventsSent += eventsToSendThisTick;
 
         if (eventsSent >= numEventsToSend)
-          return events;
+          break;
 
         // go to next tick
         await metronome.wait(1);
@@ -72,11 +76,13 @@ class Simulation {
         eventsSent++;
 
         if (eventsSent >= numEventsToSend)
-          return events;
+          break;
 
         await metronome.wait(tickDelta);
       }
     }
+    this._arrivalRate = 0;
+    return events;
   }
 
   /**
@@ -108,6 +114,10 @@ class Simulation {
     });
   }
 
+
+  public getArrivalRate(): number {
+    return this._arrivalRate;
+  }
   //TODO:
   /*async runForSomeTicks(stage: Stage, numTicks: number): Promise<void> {
   }*/

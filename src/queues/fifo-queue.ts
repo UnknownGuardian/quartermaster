@@ -7,7 +7,7 @@ type Item = { callback: Function, event: Event };
  * A FIFO queue implementation.
  */
 export class FIFOQueue implements Queue {
-  private items: Item[] = [];
+  public readonly items: Item[] = [];
   private workers: Worker[] = [];
   private capacity: number = 0;
 
@@ -60,7 +60,9 @@ export class FIFOQueue implements Queue {
     nextUp.callback(null, worker);
   }
 
-
+  length(): number {
+    return this.items.length;
+  }
   setCapacity(capacity: number): void {
     this.capacity = capacity;
   }
