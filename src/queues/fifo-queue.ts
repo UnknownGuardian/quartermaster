@@ -78,8 +78,10 @@ export class FIFOQueue implements Queue {
    */
   setNumWorkers(num: number): void {
     if (num > this.workers.length) {
-      while (this.workers.length < num)
+      while (this.workers.length < num) {
         this.workers.push(new Worker(this));
+        this.work();
+      }
     } else {
       // This really just depends on garbage collection implementation. For
       // some gc, we have to explicitly destroy reference to the queue in the

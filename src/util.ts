@@ -46,12 +46,15 @@ export function sigmoid(value: number, max: number, k: number = 3) {
   return 1 / (1 + Math.pow(1 / value - 1, -k));
 }
 
-(latency: number) => {
-  const k = 3;
-  const max = 190; // somewhere around 98%
-  if (latency > max) return 0;
 
-  latency /= max;
 
-  return 1 / (1 + Math.pow(1 / latency - 1, -k));
+/**
+ * The exponential function of ab^x
+ * @param a 
+ * @param b 
+ * @param x 
+ */
+export function exponential(a: number, b: number, x: number) {
+  return a * b ** x;
 }
+
