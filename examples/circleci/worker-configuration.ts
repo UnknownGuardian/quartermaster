@@ -56,14 +56,14 @@
  * 
  */
 
-import { Stage, Event, metronome, normal, FIFOQueue, WrappedStage, simulation, eventSummary, stageSummary, Retry, TimeStats, stats } from "../src";
+import { Stage, Event, metronome, normal, FIFOQueue, WrappedStage, simulation, eventSummary, stageSummary, Retry, TimeStats, stats, CircuitBreaker, AdaptiveCircuitBreaker, Timeout, exponential } from "../../src";
 
 class GithubHookReceiver extends WrappedStage {
   constructor(protected wrapped: Stage) {
     super(wrapped);
 
     // build queue
-    this.inQueue = new FIFOQueue(Infinity, 220);
+    this.inQueue = new FIFOQueue(Infinity, 120);
   }
   async workOn(event: Event): Promise<void> {
     stats.max('receiver.queuelength', (this.inQueue as FIFOQueue).length())
@@ -80,10 +80,10 @@ class GithubHookReceiver extends WrappedStage {
 
 
 
+
 /**
  * Database with exponential serving time 
  */
-type Item = { event: Event, resolve?: Function }
 class DB extends Stage {
   public concurrent: number = 0;
   public availability = 0.9995;
@@ -105,7 +105,7 @@ class DB extends Stage {
 
   constructor() {
     super();
-    this.inQueue = new FIFOQueue(1, 400);
+    this.inQueue = new FIFOQueue(1, 300);
   }
 
   async workOn(event: Event): Promise<void> {
@@ -115,9 +115,9 @@ class DB extends Stage {
       stats.add("db.deadlocked", 1);
 
     try {
-      const extraMean = this.latencyX0 * ((1 + this.latencyR) ** this.concurrent);
-      const extraStd = extraMean / 500;
-      const latency = normal(this.mean + extraMean, this.std + extraStd);
+      const concurrentLatency = exponential(this.latencyX0, 1 + this.latencyR, this.concurrent);
+      const concurrencyStd = concurrentLatency / 500;
+      const latency = normal(this.mean + concurrentLatency, this.std + concurrencyStd);
       await metronome.wait(latency);
 
       const actualAvailability = this.concurrent >= this.deadlockThreshold ? this.deadlockAvailability : this.availability;
@@ -135,6 +135,10 @@ class DB extends Stage {
 
 
 const db = new DB();
+// initial improvements
+db.latencyX0 = 0.05;
+db.latencyR = 0.035;
+
 const retry = new Retry(db);
 retry.attempts = 10;
 const rec = new GithubHookReceiver(retry);
@@ -142,7 +146,7 @@ const rec = new GithubHookReceiver(retry);
 
 simulation.keyspaceMean = 1000;
 simulation.keyspaceStd = 200;
-simulation.eventsPer1000Ticks = 2010;
+simulation.eventsPer1000Ticks = 5000;
 
 
 const interval = 2000;
@@ -154,23 +158,18 @@ metronome.setInterval(() => {
   const processingRate = simulation.getArrivalRate() - change
 
 
-  // to explore to find limit, we can do this
-  /*if (processingRate > 40) {
-    simulation.eventsPer1000Ticks += 10;
-  }*/
-
-  table.push({ now: metronome.now(), queueLength: len, eventRate: simulation.getArrivalRate(), change, processingRate })
+  table.push({ now: metronome.now(), queueLength: len, eventRate: simulation.getArrivalRate(), change, processingRate, workers: rec.inQueue.getNumWorkers() })
   lastLength = len
 }, interval)
 
 
 work();
 async function work() {
-  const events = await simulation.run(rec, 10000);
-  eventSummary(events);
-  stageSummary([db, rec])
+  const events = await simulation.run(rec, 65000);
+  //eventSummary(events);
+  //stageSummary([db, rec])
   stats.summary();
-  metronome.debug();
-  console.table(table.slice(0, 600));
+  //metronome.debug();
+  console.table(table.slice(0, 50));
 }
 

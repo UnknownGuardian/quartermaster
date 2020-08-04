@@ -25,8 +25,11 @@
     "example:variable-traffic": "ts-node examples/variable-traffic.ts",
     "example:aggressive-timeouts": "ts-node examples/aggressive-timeouts.ts",
     "example:custom-statistics": "ts-node examples/custom-statistics.ts",
-    "example:circleci": "ts-node examples/circleci-incident.ts",
-    "example:ci": "ts-node examples/ci.ts",
+    "example:circleci": "ts-node examples/circleci/video-worker-configuration.ts",
+    "example:circleci-old": "ts-node examples/circleci/circleci-incident.ts",
+    "example:ci1": "ts-node examples/circleci/query-plan-improvements.ts",
+    "example:ci2": "ts-node examples/circleci/worker-configuration.ts",
+    "example:ci3": "ts-node examples/circleci/adaptive.ts",
     "start": "ts-node src/index.ts",
     "test": "jest"
   },

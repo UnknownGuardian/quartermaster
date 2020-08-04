@@ -56,7 +56,7 @@
  * 
  */
 
-import { Stage, Event, metronome, normal, FIFOQueue, WrappedStage, simulation, eventSummary, stageSummary, Retry, TimeStats, stats } from "../src";
+import { Stage, Event, metronome, normal, FIFOQueue, WrappedStage, simulation, eventSummary, stageSummary, Retry, TimeStats, stats } from "../../src";
 
 class GithubHookReceiver extends WrappedStage {
   constructor(protected wrapped: Stage) {
@@ -83,6 +83,7 @@ class GithubHookReceiver extends WrappedStage {
 /**
  * Database with exponential serving time 
  */
+type Item = { event: Event, resolve?: Function }
 class DB extends Stage {
   public concurrent: number = 0;
   public availability = 0.9995;
@@ -134,53 +135,35 @@ class DB extends Stage {
 
 
 const db = new DB();
+// initial improvements
+db.latencyX0 = 0.05;
+db.latencyR = 0.035;
+
+
 const retry = new Retry(db);
 retry.attempts = 10;
 const rec = new GithubHookReceiver(retry);
 
 
-
-
-
-const fastRate = 5000
-const fastEvents = 20000;
-const slowRate = 200
-const slowEvents = 1000;
-const resetRate = 1;
-const resetEvents = 3500
-
 simulation.keyspaceMean = 1000;
 simulation.keyspaceStd = 200;
-simulation.eventsPer1000Ticks = fastRate;
+simulation.eventsPer1000Ticks = 1900;
 
 
-
-metronome.setTimeout(() => {
-  simulation.eventsPer1000Ticks = slowRate;
-  console.log("Setting event rate to slow rate @", metronome.now())
-}, fastEvents / fastRate * 1000)
-
-metronome.setTimeout(() => {
-  simulation.eventsPer1000Ticks = 1;
-  console.log("Setting event rate to 1 @", metronome.now())
-}, fastEvents / fastRate * 1000 + slowEvents / slowRate * 1000)
-
-metronome.setTimeout(() => {
-  simulation.eventsPer1000Ticks = 2200;
-  console.log("Setting event rate to slow rate final time @", metronome.now())
-},
-  fastEvents / fastRate * 1000 +
-  slowEvents / slowRate * 1000 +
-  resetEvents / resetRate * 1000
-)
-
-const interval = 1000;
+const interval = 2000;
 let lastLength = 0;
 const table: any[] = [];
 metronome.setInterval(() => {
   const len = (rec.inQueue as FIFOQueue).length();
   const change = (len - lastLength) * (1000 / interval)
   const processingRate = simulation.getArrivalRate() - change
+
+
+  // to explore to find limit, we can do this
+  if (processingRate > 40) {
+    simulation.eventsPer1000Ticks += 50;
+  }
+
   table.push({ now: metronome.now(), queueLength: len, eventRate: simulation.getArrivalRate(), change, processingRate })
   lastLength = len
 }, interval)
@@ -188,23 +171,11 @@ metronome.setInterval(() => {
 
 work();
 async function work() {
-  const events = await simulation.run(rec, fastEvents + slowEvents + resetEvents + 9000);
-  eventSummary(events);
-  stageSummary([db, rec])
-  stats.summary();
-  metronome.debug();
-  console.table(table);
+  const events = await simulation.run(rec, 100000);
+  //eventSummary(events);
+  //stageSummary([db, rec])
+  //stats.summary();
+  //metronome.debug();
+  console.table(table.slice(0, 25));
 }
 
-
-type TrafficShape = { num: number, rate: number }
-function scheduleEvents(data: TrafficShape[]) {
-  let tick = 0;
-  for (let i = 0; i < data.length; i++) {
-    const shape = data[i];
-    metronome.setTimeout(() => {
-      simulation.eventsPer1000Ticks = shape.rate;
-    }, tick)
-    tick += shape.num / shape.rate * 1000;
-  }
-}
