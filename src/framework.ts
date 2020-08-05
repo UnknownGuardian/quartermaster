@@ -1,4 +1,5 @@
 import { Stage, Event, Response, metronome, standardDeviation } from "."
+import { normal } from "./util";
 
 
 class Simulation {
@@ -19,6 +20,7 @@ class Simulation {
 
 
   private _arrivalRate: number = 0;
+  private _eventsSent: number = 0;
 
 
   /**
@@ -54,6 +56,7 @@ class Simulation {
     while (true) {
       const tickDelta = 1000 / this.eventsPer1000Ticks;
       this._arrivalRate = this.eventsPer1000Ticks;
+      this._eventsSent = eventsSent;
 
       if (tickDelta < 1) {
         // fire off multiple events per tick
@@ -99,7 +102,8 @@ class Simulation {
   }
 
   private createEvent(stage: Stage): Promise<Event> {
-    const event = new Event("e-" + Math.floor(Math.random() * 500));
+    const key = "e-" + normal(this.keyspaceMean, this.keyspaceStd);
+    const event = new Event(key);
     const time = event.responseTime;
     time.startTime = metronome.now();
 
@@ -117,6 +121,9 @@ class Simulation {
 
   public getArrivalRate(): number {
     return this._arrivalRate;
+  }
+  public getEventsSent(): number {
+    return this._eventsSent;
   }
   //TODO:
   /*async runForSomeTicks(stage: Stage, numTicks: number): Promise<void> {

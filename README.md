@@ -10,6 +10,8 @@ To explore and develop locally, you can clone this repository. This provides the
 
 `git clone git@github.com:UnknownGuardian/quartermaster.git`
 
+Then, run `npm i` to install all the dependencies.
+
 ## Usage
 
 A sample usage, representing a call to a remote dependency with a cache:
