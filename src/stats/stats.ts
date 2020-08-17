@@ -5,9 +5,11 @@ type Line = {
   value: number;
   called: number;
 }
+type SeriesTable = Record<string, Series>;
+type Series = any[]
 class Stats {
   private table: Table = {};
-
+  private timeSeries: SeriesTable = {};
   add(name: string, value: number) {
     if (!this.table[name]) {
       this.table[name] = { value: 0, called: 0, type: "add" };
@@ -28,8 +30,16 @@ class Stats {
     existing.called++;
   }
 
-  summary(): void {
-    console.log("Stats tracked through the global stats instance")
+  record(name: string, values: any) {
+    if (!this.timeSeries[name]) {
+      this.timeSeries[name] = [];
+    }
+
+    const existing = this.timeSeries[name];
+    existing.push(values);
+  }
+
+  summary(extended: boolean = false): void {
     const virtual: Table = JSON.parse(JSON.stringify(this.table))
 
     for (const [key, line] of Object.entries(virtual)) {
@@ -37,7 +47,20 @@ class Stats {
       if (line.type == "add")
         row.avg = line.called > 0 ? (line.value / line.called).toFixed(3) : 0
     }
-    console.table(virtual);
+    if (Object.entries(virtual).length > 0) {
+      console.log("Stats tracked through the global stats instance")
+      console.table(virtual);
+    }
+
+    for (const [key, series] of Object.entries(this.timeSeries)) {
+      console.log(`Global stats instance table '${key}':`)
+      if (series.length > 30 && !extended) {
+        console.table(series.slice(0, 30));
+        console.log(`...${series.length - 30} rows trimmed.`)
+      }
+      else
+        console.table(series);
+    }
   }
 }
 

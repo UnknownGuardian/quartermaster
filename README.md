@@ -184,3 +184,5 @@ Open a pull request with your contributions to the framework, or request a featu
   - [ ] evaluations section
   - [ ] references
   - [ ] mention relation to SEDA
+- [x] stats
+  - [x] stats.record => record in a way that you can `console.table()`
