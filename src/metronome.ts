@@ -49,6 +49,11 @@ class Metronome {
 
   // halt until resolved
   private async sleep() {
+    // In Node 14- promise rejections are handled nextTick. The simulation
+    // usually generates thousands of unhandled promises, which will cause
+    // a long delay after the simulation
+    // https://github.com/nodejs/node/issues/34851
+    waitRealTime(1);
     if (this._callbacks.length == 0) {
       await new Promise((resolve) => {
         this._sleepResolve = resolve;
@@ -101,6 +106,10 @@ class Metronome {
     console.log("Current Tick:", this.now())
   }
 
+}
+
+function waitRealTime(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const metronome = new Metronome();

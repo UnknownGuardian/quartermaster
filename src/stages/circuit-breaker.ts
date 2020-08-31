@@ -80,6 +80,7 @@ export class CircuitBreaker extends WrappedStage {
             this.open();
           else
             this.close();
+          break;
       }
     }
   }
@@ -91,12 +92,21 @@ export class CircuitBreaker extends WrappedStage {
 
     this._state = "open";
     this._ring = [];
+    this._openTime = metronome.now();
   }
   protected close(): void {
+    if (this.state == "closed")
+      return;
+
     this._state = "closed";
+    this._ring = [];
   }
   protected halfOpen(): void {
+    if (this.state == "half-open")
+      return;
+
     this._state = "half-open";
+    this._ring = []
   }
 
   get state(): CircuitBreakerState {

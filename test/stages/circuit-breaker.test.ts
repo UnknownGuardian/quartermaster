@@ -68,7 +68,7 @@ describe('Circuit-breaker', () => {
     })
   })
 
-  describe.only('half-open', () => {
+  describe('half-open', () => {
     test('moves in to half-open after being open for some time', async () => {
       breaker.errorThreshold = 0.1;
       dependency.replay = allFails.concat(allFails);

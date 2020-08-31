@@ -1,5 +1,7 @@
 import { Stage, Event, Response, metronome, standardDeviation } from "."
 import { normal } from "./util";
+import { stats } from "./stats";
+import { reset } from "colors";
 
 
 class Simulation {
@@ -23,6 +25,11 @@ class Simulation {
   private _eventsSent: number = 0;
 
 
+  reset() {
+    this._arrivalRate = 0;
+    this._eventsSent = 0;
+  }
+
   /**
  * Execute a simulation
  * 
@@ -33,6 +40,11 @@ class Simulation {
  * @param numEventsToSend The number of events to be sent
  */
   async run(stage: Stage, numEventsToSend: number): Promise<Event[]> {
+    // clear global state (ouch)
+    this.reset();
+    stats.reset();
+    metronome.resetCurrentTime();
+
     const delta = 1 / this.eventsPer1000Ticks;
     metronome.start();
 
