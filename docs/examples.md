@@ -4,6 +4,10 @@ We have provided a set of examples to demonstrate how Quartermaster can be used 
 
 ## Table of Contents
 
+[Incident Reports](#reports)
+
+[Other](#Other)
+
 **[1. Timed](#Timed)**
 
 **[2. Manual Events](#Manual-Events)**
@@ -18,7 +22,17 @@ We have provided a set of examples to demonstrate how Quartermaster can be used 
 
 **[7. Novel](#novel)**
 
-## Timed
+## Reports
+
+### CircleCI 2015 Incident
+
+Summary: A large burst in traffic caused a deadlocked database, cascading failures into the build service. Engineers prevented new elements from joining a backed up queue, turned off automatic retries, optimized slow database queries, and provisioned new hardware. [Full Incident Report.](https://circleci.statuspage.io/incidents/hr0mm9xmm3x6)
+
+Quartermaster Implementation: [`./examples/circleci`](../examples/circleci)
+
+## Other
+
+### Timed
 
 If you are jumping into Quartermaster, start with this example.
 
@@ -26,11 +40,11 @@ The timed example demonstrates a simple dependency that has cache before it. Thi
 
 This example shows how such a cache and dependency are represented as a `LRUCache` and a `TimedDependency` and how to configure properties on each.
 
-## Manual Events
+### Manual Events
 
 This example shows how to manually send events through an identical system to the Timed example (a dependency with a cache). This could prove useful as starter code to demonstrate how to replay live traffic through the system.
 
-## Aggressive Timeout
+### Aggressive Timeout
 
 This example shows how to evaluate the effects of using specific techniques on some system. A `TimedDependency` represents some remote dependency such as a different microservice. This dependency has an interesting property: failures have a higher latency than successes.
 
@@ -38,10 +52,10 @@ Since failures are slower than successes, it is possible to configure a timeout 
 
 Events are sent through the system without any fault tolerant technique and through a duplicate system that contains a retry and timeout. Then, a summary is displayed of the events from both systems to evaluate how behavior changed. Finally, this example demonstrates `eventCompare(events, events2)`, which provides a simple diff between the two sets of events.
 
-## Variable Traffic
+### Variable Traffic
 
-## Queue Sorting
+### Queue Sorting
 
-## Custom Statistics
+### Custom Statistics
 
-## Novel
+### Novel

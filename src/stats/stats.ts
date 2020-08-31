@@ -30,6 +30,18 @@ class Stats {
     existing.called++;
   }
 
+  get(name: string): number {
+    return this.table[name]?.value || 0;
+  }
+  getRecorded(name: string): any[] {
+    return this.timeSeries[name] || [];
+  }
+
+  reset(): void {
+    this.table = {};
+    this.timeSeries = {};
+  }
+
   record(name: string, values: any) {
     if (!this.timeSeries[name]) {
       this.timeSeries[name] = [];
