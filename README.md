@@ -1,6 +1,6 @@
 # Quartermaster
 
-A framework to model and simulate graceful degradation techniques.
+A framework to model and simulate systems and graceful degradation techniques.
 
 ---
 
@@ -10,7 +10,7 @@ To explore and develop locally, you can clone this repository. This provides the
 
 `git clone git@github.com:UnknownGuardian/quartermaster.git`
 
-Then, run `npm i` to install all the dependencies.
+Then, run `npm i` to install dependencies.
 
 ## Usage
 
@@ -71,7 +71,7 @@ async function work() {
 
 A system that is fault tolerant is resistant to faults, often by allowing the system to degrade gracefully instead of failing immediately. There are certain techniques that are commonly used in industry to this end, such as caching, retries, short timeouts, and the circuit breaker pattern.
 
-In Quartermaster a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous be http requests.
+In Quartermaster a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous to http requests.
 
 `add()` An admission control function, called before the event enters the queue.
 \
@@ -87,7 +87,7 @@ In Quartermaster a user can describe a system's structure and the fault-tolerant
 
 A framework is provided to implement these methods and simulate their behavior. Provided with this code is a set of prebuilt code, is some simulation tools. Since this repository is a typescript implementation of the framework, we've included a brief overview here. You can [read more in-depth about the Quartermaster framework](docs/framework.md) in our docs.
 
-### Rich Output
+### Rich Default Output
 
 The framework's `eventSummary([...events])` displays a quick summary of statistics of the events.
 
@@ -159,6 +159,11 @@ All prebuilt components have been placed under tests, located in the `./tests` d
 ## Contributing
 
 Open a pull request with your contributions to the framework, or request a feature by opening an issue.
+
+## Known Issues
+
+Node 10: Some behavioral changes - likely due to changes in the NodeJS task processing
+Node 10?/12/14: Long simulations may sometimes hang after execution as NodeJS internals are still running. (`processPromiseRejections` may take longer than the simulation itself)
 
 ## TODO:
 
