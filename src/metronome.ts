@@ -99,10 +99,13 @@ class Metronome {
     this._currentTick = 0;
   }
 
-  debug(): void {
+  debug(detail: boolean = false): void {
     console.log("Metronome Debug".green.bold);
     console.log("Keep-Alive:", this._keepAlive ? "running".green : "stopped".yellow)
     console.log("Tasks Scheduled:", this._callbacks.length)
+    if (detail) {
+      this._callbacks.forEach(x => console.log("\tTask:", x.callback.toString()))
+    }
     console.log("Current Tick:", this.now())
   }
 
