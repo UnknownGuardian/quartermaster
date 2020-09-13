@@ -30,6 +30,13 @@ export class Cache extends WrappedStage {
   }
 
   /**
+   * Removes all entries from the cache.
+   */
+  public clear(): void {
+    this._cache = {}
+  }
+
+  /**
    * Deletes a key from the cache
    * @param key The key to remove
    */
