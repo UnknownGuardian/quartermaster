@@ -1,7 +1,6 @@
 import { Stage, Event, Response, metronome, standardDeviation } from "."
 import { normal } from "./util";
 import { stats } from "./stats";
-import { reset } from "colors";
 
 
 class Simulation {

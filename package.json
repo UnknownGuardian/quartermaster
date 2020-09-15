@@ -17,7 +17,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
     "example:novel": "ts-node examples/novel.ts",
     "example:manual": "ts-node examples/manual.ts",
     "example:timed": "ts-node examples/timed.ts",
