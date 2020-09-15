@@ -29,6 +29,14 @@ export class LRUCache extends Cache {
   }
 
   /**
+   * Removes all entries from the cache.
+   */
+  public clear(): void {
+    super.clear();
+    this.order = [];
+  }
+
+  /**
    * Checks if a line item is older than the ttl
    * @param lineItem The line item to check
    */
