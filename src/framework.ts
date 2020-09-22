@@ -159,7 +159,7 @@ export const simulation = new Simulation();
  * 4. % slow failures? (interesting?)
  * @param events The events that have completed the simulation
  */
-export function eventSummary(events: Event[], additionalColumns?: EventSummaryColumnFunction[]): void {
+export function eventSummary(events: Event[], additionalColumns?: EventSummaryColumn[]): void {
   const summary = createEventSummary(events, additionalColumns);
 
   console.log("Overview of Events");
@@ -176,7 +176,11 @@ type ResponseData = {
   std_latency: string;
 }
 type EventSummaryColumnFunction = (events: Event[]) => number;
-function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumnFunction[]): Summary {
+type EventSummaryColumn = {
+  name: string;
+  func: EventSummaryColumnFunction;
+}
+function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumn[]): Summary {
   const success: Event[] = [];
   const fail: Event[] = [];
 
@@ -194,8 +198,8 @@ function createEventSummary(events: Event[], additionalColumns?: EventSummaryCol
   const std_latency = (e: Event[]) => standardDeviation(e.map(e => e.responseTime.endTime - e.responseTime.startTime));
 
   const others = additionalColumns || [];
-  const names = ["count", "percent", "mean_latency", "std_latency"]
-  const columns = [count, percent, mean_latency, std_latency, ...others];
+  const names = ["count", "percent", "mean_latency", "std_latency", ...others.map(x => x.name)]
+  const columns = [count, percent, mean_latency, std_latency, ...others.map(x => x.func)];
 
   const successRow: any = { type: "success" as Response };
   const failRow: any = { type: "fail" as Response };
