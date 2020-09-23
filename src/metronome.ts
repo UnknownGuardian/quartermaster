@@ -10,14 +10,20 @@ class Metronome {
   _sleepResolve: Function | null;
   // need an interval since node can exit early if no work is being done
   _keepAlive: any;
+  _keepAliveLastTick: number;
 
   _callbacks: DelayedCall[];
   _currentTick: number;
+
+  private _stopResolve: Function | null;
+
   constructor() {
     this._keepAlive = null;
+    this._keepAliveLastTick = 0;
     this._currentTick = 0;
     this._callbacks = [];
     this._sleepResolve = null;
+    this._stopResolve = null;
   }
 
   now() {
@@ -25,9 +31,22 @@ class Metronome {
   }
 
   async start(ticksToExecute: number = Infinity): Promise<void> {
-    this._keepAlive = setInterval(() => console.log("timer keep-alive"), 5000);
+    const id = Math.floor(Math.random() * 9999);
+    this._keepAlive = setInterval(() => {
+      console.log("timer keep-alive");
+      if (this.now() == this._keepAliveLastTick) {
+        console.log("Warning! The metronome hasn't advanced in 5 seconds, despite some process keeping this alive.")
+        metronome.debug(true)
+      }
+
+      this._keepAliveLastTick = this.now();
+    }, 5000);
     return new Promise(async (resolve) => {
+      this._stopResolve = resolve;
       while (ticksToExecute--) {
+        if (!this._keepAlive)
+          break;
+
         await this.tick();
       }
       resolve();
@@ -52,9 +71,11 @@ class Metronome {
   private async sleep() {
     // In Node 14- promise rejections are handled nextTick. The simulation
     // usually generates thousands of unhandled promises, which will cause
-    // a long delay after the simulation
+    // a long delay after the simulation. We need to wait real time for a
+    // bit just to be sure we can handle rejections.
     // https://github.com/nodejs/node/issues/34851
     waitRealTime(1);
+
     if (this._callbacks.length == 0) {
       await new Promise((resolve) => {
         this._sleepResolve = resolve;
@@ -64,8 +85,9 @@ class Metronome {
 
   private awake() {
     // don't awake if the metronome has not been started yet
-    if (!this._keepAlive)
+    if (!this._keepAlive) {
       return;
+    }
 
     // if there is something to awake to, then awake
     if (this._sleepResolve) {
@@ -91,17 +113,40 @@ class Metronome {
     }, ticks);
   }
 
-  stop(clear: Boolean = true) {
-    if (clear) this._callbacks.length = 0;
-    if (this._keepAlive) clearInterval(this._keepAlive);
-    this._keepAlive = null
+  async stop(clear: Boolean = true): Promise<void> {
+    // remove callbacks that haven't been reached
+    if (clear)
+      this._callbacks.length = 0;
+
+    // remove the keep alive
+    if (this._keepAlive) {
+      clearInterval(this._keepAlive);
+      this._keepAlive = null
+    }
+    // remove helper for keep alive
+    this._keepAliveLastTick = 0;
+
+    // stop the loop
+    if (this._stopResolve) {
+      this._stopResolve();
+      this._stopResolve = null
+    }
+
+    // wake up if needed, to stop the loop
+    if (this._sleepResolve) {
+      this._sleepResolve();
+      this._sleepResolve = null;
+    }
+
+    await waitRealTime(1);
   }
 
   wait(ticks: number): Promise<void> {
     if (!Number.isInteger(ticks)) {
       console.log(`Warning: Calling metronome.wait with a non-integer will result in rounding. \n\t metronome.wait(${ticks}) will be rounded down to metronome.wait(${Math.floor(ticks)})`)
     }
-    return new Promise((resolve) => this.setTimeout(resolve, ticks));
+    // use a named function to debug functions in _callbacks
+    return new Promise((resolve) => this.setTimeout(function _wait() { resolve() }, ticks));
   }
 
   resetCurrentTime(): void {

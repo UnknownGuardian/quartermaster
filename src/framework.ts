@@ -22,6 +22,7 @@ class Simulation {
 
   private _arrivalRate: number = 0;
   private _eventsSent: number = 0;
+  private _running: boolean = false;
 
 
   reset() {
@@ -39,16 +40,26 @@ class Simulation {
  * @param numEventsToSend The number of events to be sent
  */
   async run(stage: Stage, numEventsToSend: number): Promise<Event[]> {
+    if (this._running) {
+      throw "another simulation is already running";
+    }
+
+    //early exit when no events to send
+    if (numEventsToSend == 0) {
+      return [];
+    }
+
     // clear global state (ouch)
     this.reset();
     stats.reset();
     metronome.resetCurrentTime();
     metronome.start();
 
-    const pendingEvents = await this.sendEvents2(stage, numEventsToSend)
+    this._running = true;
+    const pendingEvents = await this.sendEvents(stage, numEventsToSend)
     const events = await Promise.all(pendingEvents);
-
-    metronome.stop();
+    await metronome.stop(true);
+    this._running = false;
     return events;
   }
 
@@ -57,14 +68,14 @@ class Simulation {
    * @param stage 
    * @param numEventsToSend 
    */
-  private async sendEvents2(stage: Stage, numEventsToSend: number): Promise<Promise<Event>[]> {
+  private async sendEvents(stage: Stage, numEventsToSend: number): Promise<Promise<Event>[]> {
     const events: Promise<Event>[] = [];
     this._eventsSent = 0;
-    console.log("Setting events sent to 0");
 
     let time = 0;
     let virtualTime = 0;
     outer: while (true) {
+      this._arrivalRate = this.eventsPer1000Ticks;
       const delta = 1000 / this.eventsPer1000Ticks;
       // delta might be 2 ticks between events for    500 eps
       // delta might be 1.43 ticks between events for 700 eps
@@ -77,82 +88,19 @@ class Simulation {
         this._eventsSent++;
 
         if (this._eventsSent >= numEventsToSend) {
-          console.log("Ending @", this._eventsSent)
           break outer;
         }
       }
-
-
 
       //go to next tick
       await metronome.wait(1);
       time++;
     }
 
-    console.log("XXXXXXXXXX")
     this._arrivalRate = 0;
     return events;
   }
 
-
-
-
-  /**
-   * A helper method to send events at the correct rate to the stage
-   * @param stage 
-   * @param numEventsToSend 
-   */
-  private async sendEvents(stage: Stage, numEventsToSend: number): Promise<Promise<Event>[]> {
-    const events: Promise<Event>[] = [];
-    let eventsSent = 0;
-
-    while (true) {
-      const tickDelta = 1000 / this.eventsPer1000Ticks;
-      this._arrivalRate = this.eventsPer1000Ticks;
-      this._eventsSent = eventsSent;
-
-      if (tickDelta < 1) {
-        // fire off multiple events per tick
-
-        let eventsToSendThisTick = Math.floor(1 / tickDelta);
-        if (eventsSent + eventsToSendThisTick > numEventsToSend) {
-          eventsToSendThisTick = numEventsToSend - eventsSent;
-        }
-        events.push(...this.createEventBatch(stage, eventsToSendThisTick))
-        eventsSent += eventsToSendThisTick;
-
-        if (eventsSent >= numEventsToSend)
-          break;
-
-        // go to next tick
-        await metronome.wait(1);
-      } else {
-        // fire off a single event per tick, might need to wait somemore.
-        events.push(this.createEvent(stage));
-        eventsSent++;
-
-        if (eventsSent >= numEventsToSend)
-          break;
-
-        await metronome.wait(tickDelta);
-      }
-    }
-    this._arrivalRate = 0;
-    return events;
-  }
-
-  /**
-   * A helper method to send a num events immediately to a stage
-   * @param stage 
-   * @param num 
-   */
-  private createEventBatch(stage: Stage, num: number): Promise<Event>[] {
-    const events: Promise<Event>[] = [];
-    for (let i = 0; i < num; i++) {
-      events.push(this.createEvent(stage));
-    }
-    return events;
-  }
 
   private createEvent(stage: Stage): Promise<Event> {
     const key = "e-" + normal(this.keyspaceMean, this.keyspaceStd);
