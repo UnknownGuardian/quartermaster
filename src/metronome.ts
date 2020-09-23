@@ -14,6 +14,7 @@ class Metronome {
   _callbacks: DelayedCall[];
   _currentTick: number;
   constructor() {
+    this._keepAlive = null;
     this._currentTick = 0;
     this._callbacks = [];
     this._sleepResolve = null;
@@ -61,7 +62,12 @@ class Metronome {
     }
   }
 
-  private async awake() {
+  private awake() {
+    // don't awake if the metronome has not been started yet
+    if (!this._keepAlive)
+      return;
+
+    // if there is something to awake to, then awake
     if (this._sleepResolve) {
       this._sleepResolve();
       this._sleepResolve = null;
@@ -92,6 +98,9 @@ class Metronome {
   }
 
   wait(ticks: number): Promise<void> {
+    if (!Number.isInteger(ticks)) {
+      console.log(`Warning: Calling metronome.wait with a non-integer will result in rounding. \n\t metronome.wait(${ticks}) will be rounded down to metronome.wait(${Math.floor(ticks)})`)
+    }
     return new Promise((resolve) => this.setTimeout(resolve, ticks));
   }
 

@@ -43,17 +43,59 @@ class Simulation {
     this.reset();
     stats.reset();
     metronome.resetCurrentTime();
-
-    const delta = 1 / this.eventsPer1000Ticks;
     metronome.start();
 
-    const pendingEvents = await this.sendEvents(stage, numEventsToSend)
+    const pendingEvents = await this.sendEvents2(stage, numEventsToSend)
     const events = await Promise.all(pendingEvents);
 
     metronome.stop();
-    //eventSummary(events);
     return events;
   }
+
+  /**
+   * A helper method to send events at the correct rate to the stage
+   * @param stage 
+   * @param numEventsToSend 
+   */
+  private async sendEvents2(stage: Stage, numEventsToSend: number): Promise<Promise<Event>[]> {
+    const events: Promise<Event>[] = [];
+    this._eventsSent = 0;
+    console.log("Setting events sent to 0");
+
+    let time = 0;
+    let virtualTime = 0;
+    outer: while (true) {
+      const delta = 1000 / this.eventsPer1000Ticks;
+      // delta might be 2 ticks between events for    500 eps
+      // delta might be 1.43 ticks between events for 700 eps
+      // delta might be 1 ticks between events for   1000 eps
+      // delta might be 0.5 ticks between events for 2000 eps
+
+      while (virtualTime <= time) {
+        virtualTime += delta;
+        events.push(this.createEvent(stage));
+        this._eventsSent++;
+
+        if (this._eventsSent >= numEventsToSend) {
+          console.log("Ending @", this._eventsSent)
+          break outer;
+        }
+      }
+
+
+
+      //go to next tick
+      await metronome.wait(1);
+      time++;
+    }
+
+    console.log("XXXXXXXXXX")
+    this._arrivalRate = 0;
+    return events;
+  }
+
+
+
 
   /**
    * A helper method to send events at the correct rate to the stage
