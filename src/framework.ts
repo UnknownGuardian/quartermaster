@@ -157,7 +157,7 @@ export function eventSummary(events: Event[], additionalColumns?: EventSummaryCo
 }
 
 
-type Summary = ResponseData[];
+type EventSummary = ResponseData[];
 type ResponseData = {
   type: Response;
   count: number;
@@ -170,7 +170,7 @@ type EventSummaryColumn = {
   name: string;
   func: EventSummaryColumnFunction;
 }
-function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumn[]): Summary {
+function createEventSummary(events: Event[], additionalColumns?: EventSummaryColumn[]): EventSummary {
   const success: Event[] = [];
   const fail: Event[] = [];
 
@@ -209,21 +209,61 @@ function createEventSummary(events: Event[], additionalColumns?: EventSummaryCol
   return table;
 }
 
+
+
+
+
+
+
+
 /**
  * Print a need summary to the console describing events' behavior within a
  * stage; specifically traffic and timing summaries.
  * 
  * @param stages A stage or an array of stages to report stats about
  */
-export function stageSummary(stages: Stage | Stage[]): void {
-  const arr = Array.isArray(stages) ? stages : [stages]
-  const times = arr.map(s => s.time);
-  const traffic = arr.map(s => ({ stage: s.time.stage, ...s.traffic }));
-  console.log("\nOverview of event time spent in stage")
-  console.table(times)
+export function stageSummary(stages: Stage | Stage[], additionalColumns?: StageSummaryColumn[]): void {
+  const arr = Array.isArray(stages) ? stages : [stages];
+  const summary = createStageSummary(arr, additionalColumns);
   console.log("\nOverview of event behavior in stage")
-  console.table(traffic);
+  console.table(summary)
 }
+
+type StageSummary = StageData[];
+type StageData = {
+  stage: string;
+  add: number;
+  queueTime: number;
+  workOn: number;
+  workTime: number;
+  success: number;
+  fail: number;
+}
+type StageSummaryColumnFunction = (stage: Stage) => number;
+type StageSummaryColumn = {
+  name: string;
+  func: StageSummaryColumnFunction;
+}
+function createStageSummary(stages: Stage[], additionalColumns: StageSummaryColumn[] = []): StageSummary {
+  return stages.map(s => ({
+    stage: s.time.stage,
+    add: s.traffic.add,
+    queueTime: s.time.queueTime,
+    workOn: s.traffic.workOn,
+    workTime: s.time.workTime,
+    success: s.traffic.success,
+    fail: s.traffic.fail,
+    ...additionalColumns.reduce((acc, cur) => {
+      acc[cur.name] = cur.func(s)
+      return acc;
+    }, {} as any)
+  }));
+}
+
+
+
+
+
 
 export function eventCompare(a: Event[], b: Event[]): void {
   const aSummary = createEventSummary(a);
@@ -237,7 +277,7 @@ export function eventCompare(a: Event[], b: Event[]): void {
 
 
   const precision = 3;
-  const diff: Summary = [
+  const diff: EventSummary = [
     {
       type: "success" as Response,
       count: bSuccess.count - aSuccess.count,
