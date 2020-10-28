@@ -22,7 +22,7 @@ class Stats {
 
   max(name: string, value: number) {
     if (!this.table[name]) {
-      this.table[name] = { value: 0, called: 1, type: "max" };
+      this.table[name] = { value: 0, called: 0, type: "max" };
     }
 
     const existing = this.table[name]
@@ -37,6 +37,9 @@ class Stats {
     return this.timeSeries[name] || [];
   }
 
+  /**
+   * Clear all recorded statistics
+   */
   reset(): void {
     this.table = {};
     this.timeSeries = {};

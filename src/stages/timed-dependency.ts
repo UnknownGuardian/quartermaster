@@ -15,17 +15,24 @@ export class TimedDependency extends Stage {
 
   public availability = 0.9995;
 
-
+  private _concurrent: number = 0;
   async workOn(event: Event): Promise<void> {
+    this._concurrent++;
     const available = Math.random() < this.availability;
     if (available) {
       const latency = normal(this.mean, this.std);
       await metronome.wait(latency);
+      this._concurrent--;
       return;
     }
 
     const latency = normal(this.errorMean, this.errorStd);
     await metronome.wait(latency);
+    this._concurrent--;
     return Promise.reject("fail");
+  }
+
+  public get concurrent(): number {
+    return this._concurrent;
   }
 }

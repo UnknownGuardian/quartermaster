@@ -23,7 +23,7 @@ describe('Framework', () => {
   })
 
 
-  describe("correctly dispatches at a rate of eventsPer1000Ticks", () => {
+  describe("correctly dispatches events at a rate of eventsPer1000Ticks", () => {
     test('200', async () => {
       await verifySimulationRate(200);
     }, 1000)

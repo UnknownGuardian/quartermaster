@@ -158,7 +158,7 @@ class Metronome {
     console.log("Keep-Alive:", this._keepAlive ? "running".green : "stopped".yellow)
     console.log("Tasks Scheduled:", this._callbacks.length)
     if (detail) {
-      this._callbacks.forEach(x => console.log("\tTask:", x.callback.toString()))
+      this._callbacks.forEach(x => console.log(`\tTask scheduled for tick ${x.tickToExecute}:`, x.callback.toString()))
     }
     console.log("Current Tick:", this.now())
   }
