@@ -1,7 +1,7 @@
 {
   "name": "quartermaster",
   "version": "1.0.0",
-  "description": "Model and Simulate techniques for Graceful Degradation",
+  "description": "A Tool for Modeling and Simulating System Degradation",
   "keywords": [
     "quartermaster",
     "graceful",
