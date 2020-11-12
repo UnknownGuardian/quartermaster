@@ -191,3 +191,4 @@ Node 10?/12/14: Long simulations may sometimes hang after execution as NodeJS in
   - [ ] mention relation to SEDA
 - [x] stats
   - [x] stats.record => record in a way that you can `console.table()`
+- [ ] error code to know simulation should abort immediately
