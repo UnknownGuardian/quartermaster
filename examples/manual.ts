@@ -1,6 +1,6 @@
 
 
-import { TimedDependency, LRUCache, Event, metronome, stageSummary } from "../src/";
+import { TimedDependency, LRUCache, Event, metronome, stageSummary, eventSummary } from "../src";
 
 /**
  * A variation of the timed example. Instead of events being sent by the 
@@ -23,7 +23,7 @@ async function manual() {
   const third = cache.accept(new Event("a"))
 
   metronome.start();
-  const response = await Promise.all([first, second, third])
+  const responses = await Promise.all([first, second, third])
   metronome.stop(true);
 
   stageSummary([cache, live])

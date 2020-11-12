@@ -3,8 +3,7 @@ import { TimedDependency, stageSummary, simulation, LRUCache, eventSummary } fro
 
 /**
  * The timed example is the basic unit of several other examples. It features
- * a timed dependency, which might represent a database and a cache that sits
- * in front of the dependency.
+ * a timed dependency, which might represent a database, and a cache.
  */
 
 const live = new TimedDependency();

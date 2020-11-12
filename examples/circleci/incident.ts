@@ -29,7 +29,7 @@ simulation.keyspaceStd = 200;
 simulation.eventsPer1000Ticks = 1500;
 
 async function work() {
-  const events = await simulation.run(service, 50000);
+  await simulation.run(service, 50000);
   console.log("done");
   stats.summary();
 }
