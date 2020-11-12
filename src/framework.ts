@@ -52,7 +52,7 @@ class Simulation {
     // clear global state (ouch)
     this.reset();
     stats.reset();
-    metronome.resetCurrentTime();
+    //metronome.resetCurrentTime();
     metronome.start();
 
     this._running = true;
