@@ -1,16 +1,12 @@
 # Quartermaster
 
-A framework to model and simulate systems and graceful degradation techniques.
+A Tool for Modeling and Simulating System Degradation
 
 ---
 
 ## Installation
 
-To explore and develop locally, you can clone this repository. This provides the examples and Typescript source code in an easy to consume format.
-
-`git clone git@github.com:UnknownGuardian/quartermaster.git`
-
-Then, run `npm i` to install dependencies.
+To explore and develop locally, you can clone this repository. Then, run `npm i` to install dependencies. This provides the examples and Typescript source code in an easy to consume format.
 
 ## Usage
 
@@ -67,11 +63,11 @@ async function work() {
 }
 ```
 
-## Model
+## The Quartermaster Model
 
 A system that is fault tolerant is resistant to faults, often by allowing the system to degrade gracefully instead of failing immediately. There are certain techniques that are commonly used in industry to this end, such as caching, retries, short timeouts, and the circuit breaker pattern.
 
-In Quartermaster a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous to http requests.
+In Quartermaster, a user can describe a system's structure and the fault-tolerant techniques it uses as various configurations of a single unit: the stage. A stage contains a queue and several methods which can be overwritten: `add()`, `workOn()`, `success()`, and `fail()`. Events are the basic units that pass through stages. In a web system, these events are analogous to http requests.
 
 `add()` An admission control function, called before the event enters the queue.
 \
@@ -81,15 +77,15 @@ In Quartermaster a user can describe a system's structure and the fault-tolerant
 \
 `fail()` Called when `workOn()` did throw an error or returned a rejected promise.
 
-[Read more about the model of Quartermaster.](docs/model.md)
+[Read more about the Quartermaster model.](docs/model.md)
 
-## Framework
+## Simulating With Quartermaster
 
-A framework is provided to implement these methods and simulate their behavior. Provided with this code is a set of prebuilt code, is some simulation tools. Since this repository is a typescript implementation of the framework, we've included a brief overview here. You can [read more in-depth about the Quartermaster framework](docs/framework.md) in our docs.
+Some tools are provided to implement these methods and simulate their behavior, such as a variety of prebuilt fault tolerant techniques. Since this repository is a typescript implementation of the model, we've included a brief overview here. You can [read more in-depth about how Quartermaster simulates a system](docs/simulation.md) in our docs.
 
 ### Rich Default Output
 
-The framework's `eventSummary([...events])` displays a quick summary of statistics of the events.
+The simulation's `eventSummary([...events])` displays a quick summary of statistics of the events.
 
 ```
 Overview of Events
@@ -101,7 +97,7 @@ Overview of Events
 └─────────┴───────────┴───────┴─────────┴──────────────┴─────────────┘
 ```
 
-The framework also comes bundled with `stageSummary([...stages])` methods, which displays rich output of a set of stages.
+The simulation also comes bundled with `stageSummary([...stages])` methods, which displays rich output of a set of stages.
 
 ```
 Overview of event time spent in stage
@@ -123,7 +119,7 @@ Overview of event behavior in stage
 
 ### Prebuilt Techniques
 
-You don't need to code your system up in the framework to use it. Quartermaster comes with a set of prebuilt techniques that are easily configured. If they don't cover all of your requirements, we've provided examples to help build your own techniques.
+You don't need to code your entire system up in Quartermaster to use it. Quartermaster comes with a set of prebuilt components and techniques that are easily configured. If they don't cover all of your requirements, we've provided examples to help build whatever you need.
 
 - Caching
   - Unbounded: An unlimited size cache
@@ -142,7 +138,7 @@ Our [examples](docs/examples.md) show you many of these in action.
 
 ### Custom Statistics
 
-While the quartermaster framework looks at measuring and evaluating graceful degradation, it is possible that you want to measure additional properties or analyze other behavior of the system. The framework is flexible enough to support doing this, and we've provided an example which includes a few ways to do so. See [the custom statistics example](docs/examples.md).
+While the Quartermaster looks at measuring and evaluating degradation, it is possible that you want to measure additional properties or analyze other behavior of the system. The model is flexible enough to support doing this, and we've provided an example which includes a few ways to do so. See [the custom statistics example](docs/examples.md).
 
 ## Examples
 
@@ -158,36 +154,12 @@ All prebuilt components have been placed under tests, located in the `./tests` d
 
 ## Contributing
 
-Open a pull request with your contributions to the framework, or request a feature by opening an issue.
+Open a pull request with your contributions to the Quartermaster, or request a feature by opening an issue.
 
 ## Known Issues
 
-Node 10: Some behavioral changes - likely due to changes in the NodeJS task processing
-Node 10?/12/14: Long simulations may sometimes hang after execution as NodeJS internals are still running. (`processPromiseRejections` may take longer than the simulation itself)
+Node 10: Some behavioral changes - likely due to changes in the NodeJS task processing. Please use Node 12+
 
-## TODO:
+## Publications
 
-- [ ] Readme
-  - [x] Main
-  - [x] Model
-  - [x] Framework
-  - [ ] Examples
-- [x] finish simulation
-- [ ] Tests
-  - [x] Queues
-  - [x] Caches
-  - [ ] Stages
-  - [ ] Simulator
-  - [ ] Metronome
-- [ ] Add custom column method to summary. i.e. just list of functions to include as additional columns in the table.
-- [x] Go to website, grab document type for latex 4 page doc, read couple papers, couple videos. Send this paper to Dr. Sillito when mature.
-- [x] Tech Transfer
-- [ ] tool for calculating gamma distribution from 50, 90, 95th percentiles
-- [ ] update documentation
-- [ ] paper
-  - [ ] feedback 7/15
-  - [ ] evaluations section
-  - [ ] references
-  - [ ] mention relation to SEDA
-- [x] stats
-  - [x] stats.record => record in a way that you can `console.table()`
+Coming Soon!
