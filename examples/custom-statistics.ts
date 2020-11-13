@@ -55,7 +55,7 @@ async function work() {
    * The default summaries can be augmented by the 2nd optional argument,
    * which allows you to pass in a custom data to print out in the table
    */
-  eventSummary(events, [customEventColumn]);
+  eventSummary(events, [{ func: customEventColumn, name: "Custom Column" }]);
   stageSummary([cache, live])
 
   console.log("")
