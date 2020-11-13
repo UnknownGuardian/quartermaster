@@ -1,3 +1,7 @@
+## Archived!
+
+Development will continue through BYU Software Engineering Lab's Organization. https://github.com/BYU-SE/quartermaster
+
 # Quartermaster
 
 A Tool for Modeling and Simulating System Degradation
